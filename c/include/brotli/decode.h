@@ -42,7 +42,11 @@ typedef enum {
   /** Partially done; should be called again with more output. */
   BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT = 3
 } BrotliDecoderResult;
-
+BrotliDecoderResult DecompressStreamV2(BrotliDecoderState* s,
+                                       uint8_t* out, size_t out_len,
+                                       const uint8_t* in, size_t in_len,
+                                       size_t* bytes_written,
+                                       size_t* bytes_consumed,size_t* has_more);
 /**
  * Template that evaluates items of ::BrotliDecoderErrorCode.
  *

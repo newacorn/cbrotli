@@ -427,6 +427,25 @@ BROTLI_ENC_API BROTLI_BOOL BrotliEncoderCompressStream(
     BrotliEncoderState* state, BrotliEncoderOperation op, size_t* available_in,
     const uint8_t** next_in, size_t* available_out, uint8_t** next_out,
     size_t* total_out);
+ typedef struct BrotliEncoderParam {
+     int quality;
+     int lgwin;
+     int lgblock;
+     int large_window;
+ }BrotliEncoderParam;
+ BrotliEncoderState* BrotliEncoderStateCreate(int quality ,int lgblock,int lgwin,int large_window );
+ typedef struct BrotliEncodeResult {
+  BROTLI_BOOL success;
+  BROTLI_BOOL has_more;
+  size_t      output_data_size;
+  size_t   bytes_consumed;
+  const  uint8_t* output_data;
+ }BrotliEncodeResult;
+void BrotliEncoderResetState(BrotliEncoderState* s);
+BrotliEncodeResult CompressStreamV2(BrotliEncoderState* s, BrotliEncoderOperation op,
+    const uint8_t* data, size_t data_size);
+
+ void DumpBrotliEncoderState(BrotliEncoderState* s);
 
 /**
  * Checks if encoder instance reached the final state.

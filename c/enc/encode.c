@@ -2001,3 +2001,187 @@ size_t MakeUncompressedStreamForTest(
 #if defined(__cplusplus) || defined(c_plusplus)
 }  /* extern "C" */
 #endif
+
+ void BrotliEncoderResetState(BrotliEncoderState* s) {
+  RingBufferFree(&s->memory_manager_,&s->ringbuffer_);
+  RingBufferInit(&s->ringbuffer_);
+  // RingBufferSetup(&s->params,&s->ringbuffer_);
+  //
+  // BROTLI_FREE(&s->memory_manager_,s->one_pass_arena_);
+  // BROTLI_FREE(&s->memory_manager_,s->two_pass_arena_);
+  // s->one_pass_arena_ =NULL;
+  // s->two_pass_arena_=NULL;
+  // __builtin_dump_struct(&s->hasher_.privat._H41, &printf);
+  // __builtin_dump_struct(&s->hasher_.privat._H42, &printf);
+  // __builtin_dump_struct(&s->hasher_.privat._H54, &printf);
+  // __builtin_dump_struct(&s->hasher_.privat._H55, &printf);
+  // __builtin_dump_struct(&s->hasher_.privat._H58, &printf);
+  // __builtin_dump_struct(&s->hasher_.privat._H65, &printf);
+  // __builtin_dump_struct(&s->hasher_.privat._H68, &printf);
+  // BROTLI_ENCODER_ON_START(s);
+
+
+  // s->num_commands_ = 0;
+  // BROTLI_FREE(&s->memory_manager_, s->commands_);//
+  // // s->command_buf_=NULL;
+  // s->commands_=NULL;//
+  // s->cmd_alloc_size_=0;//
+  //
+  // s->num_literals_ = 0;
+  // BROTLI_FREE(&s->memory_manager_,s->literal_buf_);//
+  // BROTLI_FREE(&s->memory_manager_, s->command_buf_);//
+  // s->literal_buf_ = NULL;//
+  // s->command_buf_=NULL;//
+  //
+  // BROTLI_FREE(&s->memory_manager_, s->storage_);//
+  // s->storage_=0;//
+  // s->storage_size_=0;//
+
+  // BROTLI_FREE(&s->memory_manager_,s->large_table_);
+  // s->large_table_size_=0;
+  // s->large_table_=NULL;
+
+
+  // memset(s->small_table_,0,sizeof(s->small_table_));
+
+  //
+  // Hasher RESET
+  DestroyHasher(&s->memory_manager_,&s->hasher_);
+  HasherInit(&s->hasher_);
+  // s->hasher_.common.alloc_size[0]=0;
+  // s->hasher_.common.alloc_size[1]=0;
+  // s->hasher_.common.alloc_size[2]=0;
+  // s->hasher_.common.alloc_size[3]=0;
+  s->params.hasher.type=0;//
+  s->hasher_.common.params.type=0;
+  s->hasher_.common.is_setup_ = BROTLI_FALSE;
+  s->hasher_.common.is_prepared_=BROTLI_FALSE;
+
+
+  // RingBuf RESET
+  //
+  s->params.stream_offset=0;
+  s->params.size_hint=0;
+  s->tiny_buf_.u64[0]=0;
+  s->tiny_buf_.u64[1]=0;
+  //
+
+
+  /*
+  s->ringbuffer_.buffer_[s->ringbuffer_.size_-2]=0;
+  s->ringbuffer_.buffer_[s->ringbuffer_.size_-1]=0;
+  s->ringbuffer_.buffer_[s->ringbuffer_.size_]=241;
+  static const size_t kSlackForEightByteHashingEverywhere = 7;
+  s->ringbuffer_.cur_size_=s->ringbuffer_.total_size_;
+  for (size_t i = 0; i < kSlackForEightByteHashingEverywhere; ++i) {
+    s->ringbuffer_.buffer_[s->ringbuffer_.cur_size_ + i] = 0;
+  }
+ */
+  //
+  s->input_pos_ = 0;
+  s->num_commands_ = 0;
+  //
+  s->num_literals_ = 0;
+  s->last_insert_len_=0;
+  s->last_flush_pos_=0;
+  s->last_processed_pos_=0;
+  s->last_bytes_=0;
+  s->last_bytes_bits_=0;
+  //
+  s->flint_=BROTLI_FLINT_DONE;
+  //
+  s->prev_byte2_ = 0;
+  s->prev_byte_=0;
+  //
+  s->total_in_=0;
+  s->next_out_=0;
+  s->available_out_=0;
+  s->total_out_=0;
+  //
+  s->remaining_metadata_bytes_ = BROTLI_UINT32_MAX;
+  // s->is_initialized_=BROTLI_TRUE;
+  // s->is_initialized_=BROTLI_FALSE;
+  s->is_last_block_emitted_=BROTLI_FALSE;
+  /* Initialize last byte with stream header. */
+  {
+      int lgwin = s->params.lgwin;
+      if (s->params.quality == FAST_ONE_PASS_COMPRESSION_QUALITY ||
+          s->params.quality == FAST_TWO_PASS_COMPRESSION_QUALITY) {
+        lgwin = BROTLI_MAX(int, lgwin, 18);
+          }
+      if (s->params.stream_offset == 0) {
+        EncodeWindowBits(lgwin, s->params.large_window,
+                         &s->last_bytes_, &s->last_bytes_bits_);
+      } else {
+        /* Bigger values have the same effect, but could cause overflows. */
+        s->params.stream_offset = BROTLI_MIN(size_t,
+            s->params.stream_offset, BROTLI_MAX_BACKWARD_LIMIT(lgwin));
+      }
+  }
+    s->next_out_ = NULL;
+    s->stream_state_ = BROTLI_STREAM_PROCESSING;
+    // EnsureInitialized(s);
+    // HasherReset(&s->hasher_);
+  /* Initialize distance cache. */
+  s->dist_cache_[0] = 4;
+  s->dist_cache_[1] = 11;
+  s->dist_cache_[2] = 15;
+  s->dist_cache_[3] = 16;
+  /* Save the state of the distance cache in case we need to restore it for
+     emitting an uncompressed block. */
+  memcpy(s->saved_dist_cache_, s->dist_cache_, sizeof(s->saved_dist_cache_));
+  }
+
+BrotliEncodeResult BrotliEncoderCompressStreamWithResult(
+  BrotliEncoderState *s, BrotliEncoderOperation op, size_t *available_in,
+  const uint8_t **next_in, size_t *available_out, uint8_t **next_out,
+  size_t *total_out) {
+  BrotliEncodeResult r;
+  const size_t old_available_in = *available_in;
+  r.success = BrotliEncoderCompressStream(s, op, available_in, next_in, available_out, next_out, total_out);
+  r.has_more = TO_BROTLI_BOOL(s->available_out_ != 0);
+  r.output_data = BrotliEncoderTakeOutput(s, &r.output_data_size);
+  r.bytes_consumed = old_available_in - *available_in;
+  return r;
+};
+
+BrotliEncodeResult CompressStreamV2(BrotliEncoderState* s, BrotliEncoderOperation op,
+    const uint8_t* data, size_t data_size) {
+  size_t available_in = data_size;
+  const uint8_t* next_in = data;
+  size_t available_out = 0;
+  BrotliEncodeResult r;
+  r.success = BrotliEncoderCompressStream(s, op, &available_in, &next_in, &available_out, 0,0);
+  r.output_data = BrotliEncoderTakeOutput(s, &r.output_data_size);
+  r.bytes_consumed = data_size - available_in;
+  r.has_more = TO_BROTLI_BOOL(s->available_out_ != 0);
+  return r;
+}
+BrotliEncoderState* BrotliEncoderStateCreate(int quality ,int lgblock,int lgwin,int large_window ){
+    BrotliEncoderState* state = (BrotliEncoderState*)BrotliBootstrapAlloc(
+            sizeof(BrotliEncoderState), NULL,NULL,NULL);
+    if (state == NULL) {
+        /* BROTLI_DUMP(); */
+        return 0;
+    }
+    BrotliInitMemoryManager(
+            &state->memory_manager_,NULL,NULL,NULL);
+    BrotliEncoderInitState(state);
+    //
+    if(large_window!=0){
+        state->params.large_window= TO_BROTLI_BOOL(!!large_window);
+    }
+    if(lgblock>0) {
+        state->params.lgblock = lgblock;
+    }
+    if(quality>0) {
+        state->params.quality = quality;
+    }
+    if(lgwin>0) {
+        state->params.lgwin = lgwin;
+    }
+    return state;
+}
+void DumpBrotliEncoderState(BrotliEncoderState* s) {
+  __builtin_dump_struct(s,&printf);
+}

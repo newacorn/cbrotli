@@ -2873,3 +2873,17 @@ void InverseMoveToFrontTransformForTest(
 #if defined(__cplusplus) || defined(c_plusplus)
 }  /* extern "C" */
 #endif
+BrotliDecoderResult DecompressStreamV2(BrotliDecoderState* s,
+                                            uint8_t* out, size_t out_len,
+                                            const uint8_t* in, size_t in_len,
+                                            size_t* bytes_written,
+                                            size_t* bytes_consumed,size_t* has_more) {
+    size_t in_remaining = in_len;
+    size_t out_remaining = out_len;
+    BrotliDecoderResult result = BrotliDecoderDecompressStream(
+            s, &in_remaining, &in, &out_remaining, &out, NULL);
+    *bytes_written = out_len - out_remaining;
+    *bytes_consumed = in_len - in_remaining;
+    *has_more = (size_t)BrotliDecoderHasMoreOutput(s);
+    return result;
+}
