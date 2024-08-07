@@ -78,6 +78,7 @@ func (r *Reader) Close() error {
 	// Close despite the state; i.e. there might be some unread decoded data.
 	C.BrotliDecoderDestroyInstance(r.state)
 	r.state = nil
+	r.src = nil
 	return nil
 }
 

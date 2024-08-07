@@ -26,6 +26,8 @@ static struct CompressStreamResult CompressStream(
   struct CompressStreamResult result;
   size_t available_in = data_size;
   const uint8_t* next_in = data;
+// BrotliEncoderCompressStream() function internal dereferences available_out parameter,so must handle a valid value.
+// Because we dont want this function copy data to next_out, so we set available_out = 0.
   size_t available_out = 0;
   result.success = BrotliEncoderCompressStream(s, op,
       &available_in, &next_in, &available_out, 0, 0) ? 1 : 0;
@@ -52,9 +54,29 @@ import (
 type WriterOptions struct {
 	// Quality controls the compression-speed vs compression-density trade-offs.
 	// The higher the quality, the slower the compression. Range is 0 to 11.
+	// 超过11自动修正为11，小于0修正为0.
 	Quality int
 	// LGWin is the base 2 logarithm of the sliding window size.
 	// Range is 10 to 24. 0 indicates automatic configuration based on Quality.
+	//
+	// less 0 reset to 10.
+	//
+	// large_window is true, max window size is 30, otherwise 22.
+	// if quality <= 2, large_window reset to false. do not reset to its original value.
+	//
+	// lgblock compute:
+	// 1. if quality <= 2, = LGWin;
+	// 2. if quality < 4, = 14;
+	// 3. if lgblock = 0&&quality>=9&&lgwin>16, min(16,18);
+	// 4. if lgblock = 0&&(quality<9||lgwin<=16), = 16;
+	// 5. min(24,max(16,lgblock));
+	//
+	// every copy 1<<lgblock bytes to ring buffer from input.
+	//
+	// ring buffer max size compute:
+	// 1<<1 + BROTLI_MAX(int, params->lgwin, params->lgblock);
+	//
+	//
 	LGWin int
 }
 

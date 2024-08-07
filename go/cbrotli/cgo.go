@@ -7,7 +7,8 @@ package cbrotli
 
 // Inform golang build system that it should link brotli libraries.
 
-// #cgo LDFLAGS: -lbrotlicommon
-// #cgo LDFLAGS: -lbrotlidec
-// #cgo LDFLAGS: -lbrotlienc
+// #cgo CFLAGS: -I /Users/acorn/workspace/programming/clang/brotli/out/installed/include
+// #cgo LDFLAGS:-L/Users/acorn/workspace/programming/clang/brotli/out/installed/lib -lbrotlicommon
+// #cgo LDFLAGS: -L/Users/acorn/workspace/programming/clang/brotli/out/installed/lib -lbrotlienc
+// #cgo LDFLAGS: -L/Users/acorn/workspace/programming/clang/brotli/out/installed/lib -lbrotlidec
 import "C"
