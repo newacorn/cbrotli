@@ -2,7 +2,7 @@ package cbrotli
 
 import (
 	"github.com/andybalholm/brotli"
-	pbytes "github.com/newacorn/bytes-pool/bytes"
+	pbytes "github.com/newacorn/goutils/bytes"
 	"github.com/xyproto/randomstring"
 	"sync"
 	"testing"

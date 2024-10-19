@@ -1,6 +1,7 @@
 # C
 *.d
 *.o
+*.DS_Store
 *.obj
 bin/
 buildfiles/
@@ -18,3 +19,6 @@ __pycache__/
 *.txt.uncompressed
 *.br
 *.unbr
+.idea
+cmake-build-debug
+out

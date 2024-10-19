@@ -4,7 +4,7 @@ import (
 	gbytes "bytes"
 	"fmt"
 	"github.com/gookit/goutil/testutil/assert"
-	"github.com/newacorn/bytes-pool/bytes"
+	"github.com/newacorn/goutils/bytes"
 	"github.com/xyproto/randomstring"
 	"io"
 	"math/rand"

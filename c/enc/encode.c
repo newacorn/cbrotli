@@ -2183,5 +2183,5 @@ BrotliEncoderState* BrotliEncoderStateCreate(int quality ,int lgblock,int lgwin,
     return state;
 }
 void DumpBrotliEncoderState(BrotliEncoderState* s) {
-  __builtin_dump_struct(s,&printf);
+  /*__builtin_dump_struct(s,&printf);*/
 }

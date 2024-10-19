@@ -2,8 +2,8 @@ package cbrotli
 
 import (
 	"bytes"
-	"github.com/andybalholm/brotli"
 	"github.com/gookit/goutil/testutil/assert"
+	"github.com/newacorn/brotli"
 	"github.com/xyproto/randomstring"
 	"io"
 	"os"

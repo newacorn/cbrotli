@@ -1,7 +1,7 @@
 package cbrotli
 
 import (
-	"github.com/newacorn/bytes-pool/bytes"
+	"github.com/newacorn/goutils/bytes"
 	"io"
 	"log"
 	"os"

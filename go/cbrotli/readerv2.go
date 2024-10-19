@@ -8,7 +8,7 @@ package cbrotli
 */
 import "C"
 import (
-	pool "github.com/newacorn/bytes-pool"
+	pool "github.com/newacorn/simple-bytes-pool"
 	"io"
 )
 
@@ -16,7 +16,7 @@ import (
 // underlying Reader.
 type ReaderV2 struct {
 	Reader
-	recycleItems []pool.Recycler
+	recycleItems []*pool.Bytes
 	hasMore      bool
 }
 
@@ -27,21 +27,12 @@ func (r *ReaderV2) RecycleItems() {
 	r.recycleItems = r.recycleItems[:0]
 }
 
-func (r *ReaderV2) AddRecycleItems(items ...pool.Recycler) {
-	r.recycleItems = append(r.recycleItems, items...)
-}
-
-func (r *ReaderV2) ExtractRecycleItems() (rs []pool.Recycler) {
-	rs = r.recycleItems
-	r.recycleItems = r.recycleItems[:0]
-	return
-}
-
 func (r *ReaderV2) Close() error {
 	err := r.Reader.Close()
 	r.RecycleItems()
 	return err
 }
+
 func NewReader2WithContent(src []byte) *ReaderV2 {
 	r := Reader{
 		state: C.BrotliDecoderCreateInstance(nil, nil, nil),
@@ -53,6 +44,7 @@ func NewReader2WithContent(src []byte) *ReaderV2 {
 }
 func NewReaderV2(src io.Reader) *ReaderV2 {
 	py := pool.Get(readBufSize)
+	py.B = py.B[:readBufSize]
 	r := Reader{
 		src:   src,
 		state: C.BrotliDecoderCreateInstance(nil, nil, nil),
@@ -60,9 +52,10 @@ func NewReaderV2(src io.Reader) *ReaderV2 {
 	}
 	return &ReaderV2{
 		Reader:       r,
-		recycleItems: []pool.Recycler{py},
+		recycleItems: []*pool.Bytes{py},
 	}
 }
+
 func (r *ReaderV2) Reset(src io.Reader) error {
 	r.Reader.src = src
 	return nil
