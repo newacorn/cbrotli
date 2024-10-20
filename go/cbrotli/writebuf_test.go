@@ -1,7 +1,7 @@
 package cbrotli
 
 import (
-	"github.com/andybalholm/brotli"
+	"github.com/newacorn/brotli"
 	pbytes "github.com/newacorn/goutils/bytes"
 	"github.com/xyproto/randomstring"
 	"sync"
