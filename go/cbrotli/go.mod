@@ -1,4 +1,4 @@
-module github.com/google/brotli/go/cbrotli
+module github.com/newacorn/cbrotli/go/cbrotli
 
 go 1.23.0
 
